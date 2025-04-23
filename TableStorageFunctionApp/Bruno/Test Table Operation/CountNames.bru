@@ -1,0 +1,11 @@
+meta {
+  name: CountNames
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{TableStorageAppUrl}}/names/count
+  body: none
+  auth: inherit
+}

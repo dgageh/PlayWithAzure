@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MergeSortDurableFunctionsApp", "MergeSortDurableFunctionsApp\MergeSortDurableFunctionsApp.csproj", "{06EC3883-3CDF-4E2B-BADF-0ADE9AC4E9FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TableStorageFunctionApp", "TableStorageFunctionApp\TableStorageFunctionApp.csproj", "{A05FC511-CC81-4343-AAA2-55C7E7F7DA44}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{06EC3883-3CDF-4E2B-BADF-0ADE9AC4E9FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06EC3883-3CDF-4E2B-BADF-0ADE9AC4E9FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06EC3883-3CDF-4E2B-BADF-0ADE9AC4E9FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06EC3883-3CDF-4E2B-BADF-0ADE9AC4E9FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A05FC511-CC81-4343-AAA2-55C7E7F7DA44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A05FC511-CC81-4343-AAA2-55C7E7F7DA44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A05FC511-CC81-4343-AAA2-55C7E7F7DA44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A05FC511-CC81-4343-AAA2-55C7E7F7DA44}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {810A78ED-0DEE-48BB-8262-29741858281C}
+	EndGlobalSection
+EndGlobal

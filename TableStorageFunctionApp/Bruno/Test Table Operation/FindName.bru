@@ -1,0 +1,15 @@
+meta {
+  name: FindName
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{TableStorageAppUrl}}/names/:rowkey
+  body: none
+  auth: inherit
+}
+
+params:path {
+  rowkey: 00080616-268c-4d74-8b7e-cb3bc4218edc
+}

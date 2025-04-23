@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Test Durable Merge Sort",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

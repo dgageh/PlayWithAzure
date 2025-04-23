@@ -1,0 +1,18 @@
+meta {
+  name: InsertName
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{TableStorageAppUrl}}/names
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "Name": "Dave Heindel"
+  }
+  
+}
