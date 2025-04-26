@@ -20,6 +20,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FakeCustomersFunctionApp", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FakeCustomerFunctionsApp.Models", "FakeCustomerFunctionsApp.Models\FakeCustomerFunctionsApp.Models.csproj", "{E2245EF9-55C8-41A2-A2D2-E3B11E33E207}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Durable Functions Practice", "Durable Functions Practice", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database Practice", "Database Practice", "{24A5C574-573E-4867-8090-769CC6A9FCF5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +59,14 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{06EC3883-3CDF-4E2B-BADF-0ADE9AC4E9FF} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{A05FC511-CC81-4343-AAA2-55C7E7F7DA44} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{579D9C71-905E-4DBB-BC25-563A1EC6E2B1} = {24A5C574-573E-4867-8090-769CC6A9FCF5}
+		{1CEF5086-2456-4DF8-96D9-BE279430D7CB} = {24A5C574-573E-4867-8090-769CC6A9FCF5}
+		{12CBD2AE-155D-48A0-BCF5-092E2CF92D12} = {24A5C574-573E-4867-8090-769CC6A9FCF5}
+		{E2245EF9-55C8-41A2-A2D2-E3B11E33E207} = {24A5C574-573E-4867-8090-769CC6A9FCF5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {810A78ED-0DEE-48BB-8262-29741858281C}
