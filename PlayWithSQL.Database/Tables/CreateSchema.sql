@@ -22,7 +22,7 @@ GO
 CREATE TABLE dbo.PhoneType
 (
     PhoneTypeId INT IDENTITY(1,1) PRIMARY KEY,
-    PhoneTypeName NVARCHAR(50) NOT NULL  -- Suggested values: 'Mobile', 'Home', 'Work', etc.
+    PhoneType NVARCHAR(50) NOT NULL  -- Suggested values: 'Mobile', 'Home', 'Work', etc.
 );
 GO
 

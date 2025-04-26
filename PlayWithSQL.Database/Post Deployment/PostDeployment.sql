@@ -68,7 +68,7 @@ GO
 CREATE OR ALTER PROCEDURE [dbo].[AddCustomerPhone]
     @CustomerId    INT,
     @PhoneNumber   NVARCHAR(20),
-    @PhoneTypeName NVARCHAR(50),
+    @PhoneType NVARCHAR(50),
     @NewPhoneId    INT OUTPUT
 AS
 BEGIN
@@ -80,15 +80,15 @@ BEGIN
             DECLARE @PhoneTypeId INT;
 
             -- Check if the phone type exists; if not, insert it.
-            IF NOT EXISTS (SELECT 1 FROM dbo.PhoneType WHERE PhoneTypeName = @PhoneTypeName)
+            IF NOT EXISTS (SELECT 1 FROM dbo.PhoneType WHERE PhoneType = @PhoneType)
             BEGIN
-                INSERT INTO dbo.PhoneType (PhoneTypeName)
-                VALUES (@PhoneTypeName);
+                INSERT INTO dbo.PhoneType (PhoneType)
+                VALUES (@PhoneType);
                 SET @PhoneTypeId = SCOPE_IDENTITY();
             END
             ELSE
             BEGIN
-                SELECT @PhoneTypeId = PhoneTypeId FROM dbo.PhoneType WHERE PhoneTypeName = @PhoneTypeName;
+                SELECT @PhoneTypeId = PhoneTypeId FROM dbo.PhoneType WHERE PhoneType = @PhoneType;
             END
 
             -- Now insert the customer's phone record.

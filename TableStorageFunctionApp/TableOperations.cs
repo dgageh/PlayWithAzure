@@ -1,6 +1,5 @@
 using Azure;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -106,8 +105,8 @@ namespace TableStorageFunctionApp
 
     public class NameEntity : ITableEntity
     {
-        public string PartitionKey { get; set; } = "SortedNames";
-        public string RowKey { get; set; }  // Unique name identifier
+        public string? PartitionKey { get; set; } = "SortedNames";
+        public string? RowKey { get; set; }  // Unique name identifier
         public required string Name { get; set; }
         public ETag ETag { get; set; }
         public DateTimeOffset? Timestamp { get; set; }
