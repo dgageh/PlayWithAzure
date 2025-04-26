@@ -10,7 +10,7 @@
 /* Customer Table */
 CREATE TABLE dbo.Customer
 (
-    CustomerId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    CustomerId INT IDENTITY(1,1) PRIMARY KEY,
     FirstName NVARCHAR(100) NOT NULL,
     LastName NVARCHAR(100) NOT NULL,
     Email NVARCHAR(150) NOT NULL,
@@ -58,8 +58,8 @@ GO
 /* Order Table */
 CREATE TABLE dbo.[Order]
 (
-    OrderId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    CustomerId UNIQUEIDENTIFIER NOT NULL,
+    OrderId INT IDENTITY(1,1) PRIMARY KEY,
+    CustomerId INT NOT NULL,
     OrderDate DATETIME2 DEFAULT GETDATE(),
     TotalAmount DECIMAL(10,2) NOT NULL,
     CONSTRAINT FK_Order_Customer FOREIGN KEY (CustomerId)
@@ -71,7 +71,7 @@ GO
 CREATE TABLE dbo.OrderItem
 (
     OrderItemId INT IDENTITY(1,1) PRIMARY KEY,
-    OrderId UNIQUEIDENTIFIER NOT NULL,
+    OrderId INT NOT NULL,
     ProductId INT NOT NULL,
     Quantity INT NOT NULL,
     UnitPrice DECIMAL(10,2) NOT NULL,
@@ -85,8 +85,8 @@ GO
 /* Address Table */
 CREATE TABLE dbo.Address
 (
-    AddressId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    CustomerId UNIQUEIDENTIFIER NOT NULL,
+    AddressId INT IDENTITY(1,1) PRIMARY KEY,
+    CustomerId INT NOT NULL,
     StreetAddress NVARCHAR(200) NOT NULL,
     ZipCode NVARCHAR(10) NOT NULL,
     -- Additional fields (e.g., AddressType) can be added as needed
@@ -100,8 +100,8 @@ GO
 /* CustomerPhone Table */
 CREATE TABLE dbo.CustomerPhone
 (
-    PhoneId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    CustomerId UNIQUEIDENTIFIER NOT NULL,
+    PhoneId INT IDENTITY(1,1) PRIMARY KEY,
+    CustomerId INT NOT NULL,
     PhoneNumber NVARCHAR(20) NOT NULL,
     PhoneTypeId INT NOT NULL,
     CONSTRAINT FK_CustomerPhone_Customer FOREIGN KEY (CustomerId)

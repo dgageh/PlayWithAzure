@@ -3,7 +3,7 @@ CREATE OR ALTER PROCEDURE [dbo].[InsertCustomer]
     @FirstName NVARCHAR(100),
     @LastName NVARCHAR(100),
     @Email NVARCHAR(150),
-    @NewCustomerId UNIQUEIDENTIFIER OUTPUT
+    @NewCustomerId INT OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -11,11 +11,10 @@ BEGIN
     BEGIN TRY
         BEGIN TRANSACTION;
 
-            -- Generate a new Customer ID.
-            SET @NewCustomerId = NEWID();
+            INSERT INTO dbo.Customer (FirstName, LastName, Email, CreatedDate)
+            VALUES (@FirstName, @LastName, @Email, GETDATE());
 
-            INSERT INTO dbo.Customer (CustomerId, FirstName, LastName, Email, CreatedDate)
-            VALUES (@NewCustomerId, @FirstName, @LastName, @Email, GETDATE());
+            SET @NewCustomerId = SCOPE_IDENTITY();
 
         COMMIT TRANSACTION;
     END TRY
@@ -30,7 +29,7 @@ GO
 
 -- AddCustomerAddress: Inserts a new address record for a customer.
 CREATE OR ALTER PROCEDURE [dbo].[AddCustomerAddress]
-    @CustomerId    UNIQUEIDENTIFIER,
+    @CustomerId    INT,
     @StreetAddress NVARCHAR(200),
     @ZipCode       NVARCHAR(10),
     @City          NVARCHAR(100),
@@ -49,9 +48,10 @@ BEGIN
                 VALUES (@ZipCode, @City, @State);
             END;
 
-            -- Insert the address record linked to the customer.
-            INSERT INTO dbo.Address (AddressId, CustomerId, StreetAddress, ZipCode)
-            VALUES (NEWID(), @CustomerId, @StreetAddress, @ZipCode);
+            -- Insert the address record linked to the customer.INSERT INTO dbo.Address (CustomerId, StreetAddress, ZipCode)
+            INSERT INTO dbo.Address (CustomerId, StreetAddress, ZipCode)
+            VALUES (@CustomerId, @StreetAddress, @ZipCode);
+
 
         COMMIT TRANSACTION;
     END TRY
@@ -66,10 +66,10 @@ GO
 
 -- AddCustomerPhone: Inserts a new phone record for a customer, inserting a new phone type if necessary.
 CREATE OR ALTER PROCEDURE [dbo].[AddCustomerPhone]
-    @CustomerId    UNIQUEIDENTIFIER,
+    @CustomerId    INT,
     @PhoneNumber   NVARCHAR(20),
     @PhoneTypeName NVARCHAR(50),
-    @NewPhoneId    UNIQUEIDENTIFIER OUTPUT
+    @NewPhoneId    INT OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -77,8 +77,8 @@ BEGIN
     BEGIN TRY
         BEGIN TRANSACTION;
 
-            DECLARE @PhoneTypeId INT;  -- PhoneType table uses an INT identity.
-            
+            DECLARE @PhoneTypeId INT;
+
             -- Check if the phone type exists; if not, insert it.
             IF NOT EXISTS (SELECT 1 FROM dbo.PhoneType WHERE PhoneTypeName = @PhoneTypeName)
             BEGIN
@@ -92,9 +92,9 @@ BEGIN
             END
 
             -- Now insert the customer's phone record.
-            SET @NewPhoneId = NEWID();
-            INSERT INTO dbo.CustomerPhone (PhoneId, CustomerId, PhoneNumber, PhoneTypeId)
-            VALUES (@NewPhoneId, @CustomerId, @PhoneNumber, @PhoneTypeId);
+            INSERT INTO dbo.CustomerPhone (CustomerId, PhoneNumber, PhoneTypeId)
+            VALUES (@CustomerId, @PhoneNumber, @PhoneTypeId);
+            SET @NewPhoneId = SCOPE_IDENTITY();
 
         COMMIT TRANSACTION;
     END TRY
@@ -109,9 +109,9 @@ GO
 
 -- AddCustomerOrder: Creates a new order for a customer.
 CREATE OR ALTER PROCEDURE [dbo].[AddCustomerOrder]
-    @CustomerId  UNIQUEIDENTIFIER,
+    @CustomerId  INT,
     @OrderDate   DATETIME = NULL,
-    @NewOrderId  UNIQUEIDENTIFIER OUTPUT
+    @NewOrderId  INT OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -122,9 +122,9 @@ BEGIN
     BEGIN TRY
         BEGIN TRANSACTION;
 
-            SET @NewOrderId = NEWID();
-            INSERT INTO dbo.[Order] (OrderId, CustomerId, OrderDate)
-            VALUES (@NewOrderId, @CustomerId, @OrderDate);
+            INSERT INTO dbo.[Order] (CustomerId, OrderDate)
+                VALUES (@CustomerId, @OrderDate);
+            SET @NewOrderId = SCOPE_IDENTITY();
 
         COMMIT TRANSACTION;
     END TRY
@@ -137,11 +137,9 @@ BEGIN
 END;
 GO
 
--- AddOrderItem: Inserts a new order item for an order.
--- Note: Since OrderItemId is defined as an INT identity and ProductId is an INT in the Product table,
--- we ensure the parameters reflect these types. Also, UnitPrice is passed as an input.
+
 CREATE OR ALTER PROCEDURE [dbo].[AddOrderItem]
-    @OrderId         UNIQUEIDENTIFIER,
+    @OrderId         INT,
     @ProductId       INT,
     @Quantity        INT,
     @UnitPrice       DECIMAL(10,2),
@@ -168,6 +166,7 @@ BEGIN
     END CATCH
 END;
 GO
+
 
 CREATE OR ALTER PROCEDURE [dbo].[InsertProduct]
     @ProductName NVARCHAR(150),
