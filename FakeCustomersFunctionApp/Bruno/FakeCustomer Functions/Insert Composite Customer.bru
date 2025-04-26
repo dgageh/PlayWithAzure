@@ -1,0 +1,60 @@
+meta {
+  name: Insert Composite Customer
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:7275/api/customers
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "email": "jane.doe@example.com",
+    "addresses": [
+      {
+        "streetAddress": "123 Elm Street",
+        "zipCode": "90210",
+        "city": "Los Angeles",
+        "state": "CA"
+      }
+    ],
+    "phones": [
+      {
+        "phoneNumber": "+1-555-1234",
+        "phoneType": "Mobile"
+      }
+    ],
+    "orders": [
+      {
+        "orderDate": "2025-04-26T12:45:00Z",
+        "orderItems": [
+          {
+            "productId": 1,
+            "quantity": 2,
+            "unitPrice": 19.99
+          },
+          {
+            "productId": 2,
+            "quantity": 1,
+            "unitPrice": 9.99
+          }
+        ]
+      },
+      {
+        "orderDate": "2025-04-27T10:15:00Z",
+        "orderItems": [
+          {
+            "productId": 2,
+            "quantity": 3,
+            "unitPrice": 9.49
+          }
+        ]
+      }
+    ]
+  }
+}

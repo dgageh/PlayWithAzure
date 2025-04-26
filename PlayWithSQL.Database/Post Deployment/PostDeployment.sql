@@ -33,7 +33,8 @@ CREATE OR ALTER PROCEDURE [dbo].[AddCustomerAddress]
     @StreetAddress NVARCHAR(200),
     @ZipCode       NVARCHAR(10),
     @City          NVARCHAR(100),
-    @State         CHAR(2)
+    @State         CHAR(2),
+    @NewAddressId  INT OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -51,6 +52,7 @@ BEGIN
             -- Insert the address record linked to the customer.INSERT INTO dbo.Address (CustomerId, StreetAddress, ZipCode)
             INSERT INTO dbo.Address (CustomerId, StreetAddress, ZipCode)
             VALUES (@CustomerId, @StreetAddress, @ZipCode);
+            SET @NewAddressId = SCOPE_IDENTITY();
 
 
         COMMIT TRANSACTION;

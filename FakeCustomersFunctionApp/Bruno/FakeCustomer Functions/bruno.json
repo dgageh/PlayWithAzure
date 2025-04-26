@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "FakeCustomer Functions",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

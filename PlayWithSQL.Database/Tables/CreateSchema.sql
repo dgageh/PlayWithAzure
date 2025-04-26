@@ -61,7 +61,6 @@ CREATE TABLE dbo.[Order]
     OrderId INT IDENTITY(1,1) PRIMARY KEY,
     CustomerId INT NOT NULL,
     OrderDate DATETIME2 DEFAULT GETDATE(),
-    TotalAmount DECIMAL(10,2) NOT NULL,
     CONSTRAINT FK_Order_Customer FOREIGN KEY (CustomerId)
         REFERENCES dbo.Customer(CustomerId)
 );

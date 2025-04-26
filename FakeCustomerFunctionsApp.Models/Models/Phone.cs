@@ -3,7 +3,7 @@
     public class PhoneInputDto
     {
         public required string PhoneNumber { get; set; }
-        public required string PhoneTypeName { get; set; }
+        public required string PhoneType { get; set; }
     }
 
     public class PhoneResponseDto

@@ -62,6 +62,7 @@
     <Folder Include="Views" />
     <Folder Include="Functions" />
     <Folder Include="Post Deployment" />
+    <Folder Include="Queries" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\CreateSchema.sql" />

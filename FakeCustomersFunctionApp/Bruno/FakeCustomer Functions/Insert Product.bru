@@ -1,0 +1,20 @@
+meta {
+  name: Insert Product
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:7275/api/products
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "productName": "Widget",
+    "description": "An standard widget",
+    "price": 19.99,
+    "categoryName": "Widgets"
+  }
+}

@@ -142,7 +142,7 @@ namespace FakeCustomersFunctionApp
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
                     cmd.Parameters.Add(new SqlParameter("@PhoneNumber", SqlDbType.NVarChar, 20) { Value = phone.PhoneNumber });
-                    cmd.Parameters.Add(new SqlParameter("@PhoneTypeName", SqlDbType.NVarChar, 50) { Value = phone.PhoneTypeName });
+                    cmd.Parameters.Add(new SqlParameter("@PhoneType", SqlDbType.NVarChar, 50) { Value = phone.PhoneType });
                     var outPhoneId = new SqlParameter("@NewPhoneId", SqlDbType.Int)
                     {
                         Direction = ParameterDirection.Output

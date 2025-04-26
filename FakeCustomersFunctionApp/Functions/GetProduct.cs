@@ -41,7 +41,7 @@ namespace FakeCustomersFunctionApp.Functions
                     await connection.OpenAsync();
 
                     using (var cmd = new SqlCommand(
-                        "SELECT ProductId, ProductName, Description, Price, CategoryName FROM dbo.Product",
+                        "SELECT ProductId, ProductName, Description, Price, CategoryName from dbo.Product LEFT JOIN dbo.ProductCategory on Product.CategoryId = ProductCategory.CategoryId",
                         connection))
                     {
                         using (var reader = await cmd.ExecuteReaderAsync())
@@ -92,7 +92,7 @@ namespace FakeCustomersFunctionApp.Functions
                     await connection.OpenAsync();
 
                     using (var cmd = new SqlCommand(
-                        "SELECT ProductId, ProductName, Description, Price, CategoryName FROM dbo.Product WHERE ProductId = @ProductId",
+                        "SELECT ProductId, ProductName, Description, Price, CategoryName from dbo.Product LEFT JOIN dbo.ProductCategory on Product.CategoryId = ProductCategory.CategoryId WHERE ProductId = @ProductId",
                         connection))
                     {
                         cmd.Parameters.Add(new SqlParameter("@ProductId", SqlDbType.Int) { Value = id });
