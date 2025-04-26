@@ -11,14 +11,14 @@ namespace FakeDataConsoleApp
     class Program
     {
         // Replace with your actual Azure Functions base URL.
-        private const string FunctionsBaseUrl = "https://<your-function-app-name>.azurewebsites.net/api/";
+        private const string FunctionsBaseUrl = "http://localhost:7275/api/";
 
         static async Task Main(string[] args)
         {
             using var client = new HttpClient { BaseAddress = new Uri(FunctionsBaseUrl) };
 
             // === Insert Fake Products ===
-            int numberOfFakeProducts = 10;
+            int numberOfFakeProducts = 0;
             Console.WriteLine($"Inserting {numberOfFakeProducts} fake products...");
 
             // Setup a Faker for ProductInputDto.
@@ -45,7 +45,7 @@ namespace FakeDataConsoleApp
             }
 
             // === Insert Fake Composite Customers ===
-            int numberOfFakeCustomers = 5;
+            int numberOfFakeCustomers = 100;
             Console.WriteLine($"Inserting {numberOfFakeCustomers} fake composite customers...");
 
             var customerFaker = new Faker<CustomerCompositeInputDto>()
@@ -69,11 +69,11 @@ namespace FakeDataConsoleApp
                             .RuleFor(o => o.OrderDate, f => f.Date.Past())
                             .RuleFor(o => o.OrderItems,
                                 f => new Faker<OrderItemInputDto>()
-                                        .RuleFor(oi => oi.ProductId, f => f.Random.Int(1, 100))
+                                        .RuleFor(oi => oi.ProductId, f => f.Random.Int(1, 200))
                                         .RuleFor(oi => oi.Quantity, f => f.Random.Int(1, 10))
                                         .RuleFor(oi => oi.UnitPrice, f => f.Random.Decimal(1, 100))
                                         .Generate(f.Random.Int(1, 10))) // 1 to 10 order items
-                            .Generate(f.Random.Int(0, 10))); // generate 0 to 10 orders
+                            .Generate(f.Random.Int(0, 5))); // generate 0 to 10 orders
 
             for (int i = 0; i < numberOfFakeCustomers; i++)
             {

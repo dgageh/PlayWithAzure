@@ -27,7 +27,7 @@ namespace FakeCustomersFunctionApp
         {
             _logger.LogInformation("GetCustomer function triggered.");
 
-            if (!Guid.TryParse(id, out Guid customerId))
+            if (!int.TryParse(id, out int customerId))
             {
                 var badResponse = req.CreateResponse(HttpStatusCode.BadRequest);
                 await badResponse.WriteStringAsync("Invalid customer id.");
@@ -42,7 +42,7 @@ namespace FakeCustomersFunctionApp
                 string query = "SELECT CustomerId, FirstName, LastName, Email, CreatedDate FROM dbo.Customer WHERE CustomerId = @CustomerId";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.UniqueIdentifier) { Value = customerId });
+                    command.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
                     await connection.OpenAsync();
 
                     using (SqlDataReader reader = await command.ExecuteReaderAsync())
@@ -51,7 +51,7 @@ namespace FakeCustomersFunctionApp
                         {
                             customer = new CustomerDetailDto
                             {
-                                CustomerId = (Guid)reader["CustomerId"],
+                                CustomerId = (int)reader["CustomerId"],
                                 FirstName = reader["FirstName"]?.ToString() ?? string.Empty,
                                 LastName = reader["LastName"]?.ToString() ?? string.Empty,
                                 Email = reader["Email"]?.ToString() ?? string.Empty,

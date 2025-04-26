@@ -26,7 +26,7 @@ namespace FakeCustomersFunctionApp
             _logger.LogInformation("GetCompositeCustomer function triggered.");
 
             // Validate the ID.
-            if (!Guid.TryParse(id, out Guid customerId))
+            if (!int.TryParse(id, out int customerId))
             {
                 var badResponse = req.CreateResponse(HttpStatusCode.BadRequest);
                 await badResponse.WriteStringAsync("Invalid customer id.");
@@ -64,13 +64,13 @@ namespace FakeCustomersFunctionApp
             return response;
         }
 
-        private async Task<CustomerResponseDto?> GetCustomerBasicAsync(SqlConnection connection, Guid customerId)
+        private async Task<CustomerResponseDto?> GetCustomerBasicAsync(SqlConnection connection, int customerId)
         {
             using (var cmd = new SqlCommand(
                 "SELECT CustomerId, FirstName, LastName, Email, CreatedDate FROM dbo.Customer WHERE CustomerId = @CustomerId",
                 connection))
             {
-                cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.UniqueIdentifier) { Value = customerId });
+                cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
                 using (var reader = await cmd.ExecuteReaderAsync())
                 {
                     if (await reader.ReadAsync())
@@ -92,14 +92,14 @@ namespace FakeCustomersFunctionApp
             return null;
         }
 
-        private async Task<List<AddressResponseDto>> GetAddressesAsync(SqlConnection connection, Guid customerId)
+        private async Task<List<AddressResponseDto>> GetAddressesAsync(SqlConnection connection, int customerId)
         {
             var addresses = new List<AddressResponseDto>();
             using (var cmd = new SqlCommand(
-                "SELECT AddressId, StreetAddress, ZipCode, City, State FROM dbo.Address WHERE CustomerId = @CustomerId",
+                "SELECT AddressId, StreetAddress, Address.ZipCode, City, [State] FROM dbo.Address JOIN ZipCode on Address.ZipCode = ZipCode.ZipCode WHERE CustomerId = @CustomerId",
                 connection))
             {
-                cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.UniqueIdentifier) { Value = customerId });
+                cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
                 using (var reader = await cmd.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())
@@ -118,16 +118,16 @@ namespace FakeCustomersFunctionApp
             return addresses;
         }
 
-        private async Task<List<PhoneResponseDto>> GetPhonesAsync(SqlConnection connection, Guid customerId)
+        private async Task<List<PhoneResponseDto>> GetPhonesAsync(SqlConnection connection, int customerId)
         {
             var phones = new List<PhoneResponseDto>();
             using (var cmd = new SqlCommand(
-                "SELECT cp.PhoneId, cp.PhoneNumber, pt.PhoneTypeName " +
+                "SELECT cp.PhoneId, cp.PhoneNumber, pt.PhoneType " +
                 "FROM dbo.CustomerPhone cp " +
                 "JOIN dbo.PhoneType pt ON cp.PhoneTypeId = pt.PhoneTypeId " +
                 "WHERE cp.CustomerId = @CustomerId", connection))
             {
-                cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.UniqueIdentifier) { Value = customerId });
+                cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
                 using (var reader = await cmd.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())
@@ -136,7 +136,7 @@ namespace FakeCustomersFunctionApp
                         {
                             PhoneId = (int)reader["PhoneId"],
                             PhoneNumber = reader["PhoneNumber"].ToString(),
-                            PhoneType = reader["PhoneTypeName"].ToString()
+                            PhoneType = reader["PhoneType"].ToString()
                         });
                     }
                 }
@@ -144,13 +144,13 @@ namespace FakeCustomersFunctionApp
             return phones;
         }
 
-        private async Task<List<OrderDto>> GetOrdersAsync(SqlConnection connection, Guid customerId)
+        private async Task<List<OrderDto>> GetOrdersAsync(SqlConnection connection, int customerId)
         {
             var orders = new List<OrderDto>();
             using (var cmd = new SqlCommand(
                 "SELECT OrderId, OrderDate FROM dbo.[Order] WHERE CustomerId = @CustomerId", connection))
             {
-                cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.UniqueIdentifier) { Value = customerId });
+                cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
                 using (var reader = await cmd.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())
@@ -179,7 +179,7 @@ namespace FakeCustomersFunctionApp
             using (var cmd = new SqlCommand(
                 "SELECT OrderItemId, ProductId, Quantity, UnitPrice FROM dbo.OrderItem WHERE OrderId = @OrderId", connection))
             {
-                cmd.Parameters.Add(new SqlParameter("@OrderId", SqlDbType.UniqueIdentifier) { Value = orderId });
+                cmd.Parameters.Add(new SqlParameter("@OrderId", SqlDbType.Int) { Value = orderId });
                 using (var reader = await cmd.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())

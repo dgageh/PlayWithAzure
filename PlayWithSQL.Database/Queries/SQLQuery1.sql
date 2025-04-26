@@ -9,9 +9,11 @@ SELECT * from Customer
 	left join [Order] on Customer.CustomerId = [Order].Customerid
 	left join OrderItem on OrderItem.OrderId = [Order].orderid
 
+select ProductName From OrderItem
+	join Product on OrderItem.ProductId = Product.ProductId
 
 
-
-SELECT *  from customer
+SELECT AddressId, StreetAddress, Address.ZipCode, City, [State] FROM dbo.Address
+	JOIN ZipCode on Address.ZipCode = ZipCode.ZipCode
 
 --DELETE FROM customer where CustomerId = 1

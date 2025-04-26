@@ -1,0 +1,11 @@
+meta {
+  name: Get Composite Customer
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://localhost:7275/api/customers/composite/{id}
+  body: none
+  auth: inherit
+}
