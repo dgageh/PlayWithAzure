@@ -10,7 +10,7 @@ namespace FakeDataConsoleApp
 {
     class Program
     {
-        private const string FunctionsBaseUrl = "http://localhost:7275/api/";
+        private const string FunctionsBaseUrl = "https://wordcompleter.azure-api.net/fakecustdb/api/";
 
         static async Task Main(string[] args)
         {
@@ -44,7 +44,7 @@ namespace FakeDataConsoleApp
             }
 
             // === Insert Fake Composite Customers ===
-            int numberOfFakeCustomers = 100;
+            int numberOfFakeCustomers = 500;
             Console.WriteLine($"Inserting {numberOfFakeCustomers} fake composite customers...");
 
             var customerFaker = new Faker<CustomerCompositeInputDto>()

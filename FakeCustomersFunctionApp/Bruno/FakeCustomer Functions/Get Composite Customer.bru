@@ -5,7 +5,11 @@ meta {
 }
 
 get {
-  url: http://localhost:7275/api/customers/composite/{id}
+  url: {{FakeCustDBUrl}}/customers/composite/:id
   body: none
   auth: inherit
+}
+
+params:path {
+  id: 140
 }

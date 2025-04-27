@@ -17,3 +17,23 @@ SELECT AddressId, StreetAddress, Address.ZipCode, City, [State] FROM dbo.Address
 	JOIN ZipCode on Address.ZipCode = ZipCode.ZipCode
 
 --DELETE FROM customer where CustomerId = 1
+
+--CREATE USER FakeCustomerFunctionApp FROM EXTERNAL PROVIDER;
+--ALTER ROLE db_datareader ADD MEMBER FakeCustomersFunctionApp;
+--ALTER ROLE db_datawriter ADD MEMBER FakeCustomersFunctionApp;
+
+--GRANT EXECUTE ON dbo.InsertProduct TO FakeCustomersFunctionApp;
+--GRANT EXECUTE ON dbo.[AddCustomerAddress]TO FakeCustomersFunctionApp;
+--GRANT EXECUTE ON dbo.[AddCustomerPhone]TO FakeCustomersFunctionApp;
+--GRANT EXECUTE ON dbo.[AddCustomerOrder]TO FakeCustomersFunctionApp;
+--GRANT EXECUTE ON dbo.[AddOrderItem]TO FakeCustomersFunctionApp;
+--GRANT EXECUTE ON dbo.[InsertCustomer]TO FakeCustomersFunctionApp;
+
+select count(*) from Customer
+select count(*) from dbo.[Order]
+select count(*) from Address
+select count(*) from OrderItem
+select count(*) from Product
+select count(*) from ProductCategory
+select count(*) from CustomerPhone
+select count(*) from PhoneType
