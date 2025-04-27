@@ -4,13 +4,12 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Bogus;
 using Newtonsoft.Json;
-using FakeCustomersFunctionApp.Models; // Your shared DTOs
+using FakeCustomersFunctionApp.Models; 
 
 namespace FakeDataConsoleApp
 {
     class Program
     {
-        // Replace with your actual Azure Functions base URL.
         private const string FunctionsBaseUrl = "http://localhost:7275/api/";
 
         static async Task Main(string[] args)
