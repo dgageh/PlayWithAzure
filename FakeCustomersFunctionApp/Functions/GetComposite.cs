@@ -27,7 +27,6 @@ namespace FakeCustomersFunctionApp
 
             try
             {
-                // Validate the ID.
                 if (!int.TryParse(id, out int customerId))
                 {
                     _logger.LogWarning("Invalid customer ID: {Id}", id);
@@ -44,10 +43,8 @@ namespace FakeCustomersFunctionApp
                     await connection.OpenAsync();
                     _logger.LogInformation("Database connection opened successfully.");
 
-                    // Get the basic customer information.
                     customer = await GetCustomerBasicAsync(connection, customerId);
 
-                    // If no customer was found, return immediately.
                     if (customer == null)
                     {
                         _logger.LogWarning("Customer with ID {CustomerId} not found.", customerId);
@@ -56,7 +53,6 @@ namespace FakeCustomersFunctionApp
                         return notFoundResponse;
                     }
 
-                    // Populate the associated collections.
                     customer.Addresses = await GetAddressesAsync(connection, customerId);
                     customer.Phones = await GetPhonesAsync(connection, customerId);
                     customer.Orders = await GetOrdersAsync(connection, customerId);
@@ -127,7 +123,7 @@ namespace FakeCustomersFunctionApp
             try
             {
                 using (var cmd = new SqlCommand(
-                    "SELECT AddressId, StreetAddress, Address.ZipCode, City, [State] FROM dbo.Address JOIN ZipCode on Address.ZipCode = ZipCode.ZipCode WHERE CustomerId = @CustomerId",
+                    "SELECT AddressId, StreetAddress, Address.ZipCode, City, [State] FROM dbo.Address LEFT JOIN ZipCode on Address.ZipCode = ZipCode.ZipCode WHERE CustomerId = @CustomerId",
                     connection))
                 {
                     cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
@@ -163,7 +159,7 @@ namespace FakeCustomersFunctionApp
                 using (var cmd = new SqlCommand(
                     "SELECT cp.PhoneId, cp.PhoneNumber, pt.PhoneType " +
                     "FROM dbo.CustomerPhone cp " +
-                    "JOIN dbo.PhoneType pt ON cp.PhoneTypeId = pt.PhoneTypeId " +
+                    "LEFT JOIN dbo.PhoneType pt ON cp.PhoneTypeId = pt.PhoneTypeId " +
                     "WHERE cp.CustomerId = @CustomerId", connection))
                 {
                     cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
@@ -206,13 +202,12 @@ namespace FakeCustomersFunctionApp
                             {
                                 OrderId = (int)reader["OrderId"],
                                 OrderDate = Convert.ToDateTime(reader["OrderDate"]),
-                                OrderItems = new List<OrderItemDto>()
+                                OrderItems = new List<OrderItemResponseDto>()
                             });
                         }
                     }
                 }
 
-                // For each order, retrieve its order items.
                 foreach (var order in orders)
                 {
                     order.OrderItems = await GetOrderItemsAsync(connection, order.OrderId);
@@ -226,25 +221,28 @@ namespace FakeCustomersFunctionApp
             return orders;
         }
 
-        private async Task<List<OrderItemDto>> GetOrderItemsAsync(SqlConnection connection, int orderId)
+        private async Task<List<OrderItemResponseDto>> GetOrderItemsAsync(SqlConnection connection, int orderId)
         {
-            var orderItems = new List<OrderItemDto>();
+            var orderItems = new List<OrderItemResponseDto>();
             try
             {
                 using (var cmd = new SqlCommand(
-                    "SELECT OrderItemId, ProductId, Quantity, UnitPrice FROM dbo.OrderItem WHERE OrderId = @OrderId", connection))
+                    "SELECT OrderItemId, OrderItem.ProductId, Quantity, UnitPrice, ProductName, CategoryName, Description FROM dbo.OrderItem LEFT JOIN dbo.Product ON OrderItem.ProductId = Product.ProductId LEFT JOIN dbo.ProductCategory on Product.CategoryId = ProductCategory.CategoryId  WHERE OrderId = @OrderId", connection))
                 {
                     cmd.Parameters.Add(new SqlParameter("@OrderId", SqlDbType.Int) { Value = orderId });
                     using (var reader = await cmd.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
                         {
-                            orderItems.Add(new OrderItemDto
+                            orderItems.Add(new OrderItemResponseDto
                             {
                                 OrderItemId = (int)reader["OrderItemId"],
                                 ProductId = (int)reader["ProductId"],
+                                ProductName = reader["ProductName"].ToString(),
+                                CategoryName = reader["CategoryName"].ToString(),
+                                Description = reader["Description"].ToString(),
                                 Quantity = (int)reader["Quantity"],
-                                UnitPrice = (decimal)reader["UnitPrice"]
+                                UnitPrice = (decimal)reader["UnitPrice"]                                
                             });
                         }
                     }

@@ -16,7 +16,6 @@ namespace FakeDataConsoleApp
         {
             using var client = new HttpClient { BaseAddress = new Uri(FunctionsBaseUrl) };
 
-            // === Insert Fake Products ===
             int numberOfFakeProducts = 0;
             Console.WriteLine($"Inserting {numberOfFakeProducts} fake products...");
 
@@ -43,7 +42,6 @@ namespace FakeDataConsoleApp
                 }
             }
 
-            // === Insert Fake Composite Customers ===
             int numberOfFakeCustomers = 500;
             Console.WriteLine($"Inserting {numberOfFakeCustomers} fake composite customers...");
 

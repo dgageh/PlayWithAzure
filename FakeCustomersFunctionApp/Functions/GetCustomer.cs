@@ -91,7 +91,7 @@ namespace FakeCustomersFunctionApp
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred while processing the request for Customer ID: {Id}.", id);
-                throw; // Re-throw the exception to let the runtime handle it.
+                throw; 
             }
         }
     }

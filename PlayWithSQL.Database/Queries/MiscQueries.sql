@@ -37,3 +37,14 @@ select count(*) from Product
 select count(*) from ProductCategory
 select count(*) from CustomerPhone
 select count(*) from PhoneType
+
+select distinct state, count(address.addressid) from ZipCode
+	join dbo.Address on ZipCode.ZipCode = Address.ZipCode
+	group by ZipCode.State
+	order by count(address.addressid) desc
+
+
+SELECT OrderItemId, OrderItem.ProductId, Quantity, UnitPrice, ProductName, CategoryName, Description FROM dbo.OrderItem 
+	JOIN dbo.Product ON OrderItem.ProductId = Product.ProductId
+	JOIN dbo.ProductCategory on Product.CategoryId = ProductCategory.CategoryId 
+	WHERE OrderId=5

@@ -4,13 +4,16 @@
     {
         public int OrderId { get; set; }
         public DateTime OrderDate { get; set; }
-        public List<OrderItemDto>? OrderItems { get; set; }
+        public List<OrderItemResponseDto>? OrderItems { get; set; }
     }
 
-    public class OrderItemDto
+    public class OrderItemResponseDto
     {
         public int OrderItemId { get; set; }
         public int ProductId { get; set; }
+        public string? ProductName { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public string? CategoryName { get; set; } = string.Empty;
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
     }
