@@ -25,69 +25,98 @@ namespace FakeCustomersFunctionApp
         {
             _logger.LogInformation("GetCompositeCustomer function triggered.");
 
-            // Validate the ID.
-            if (!int.TryParse(id, out int customerId))
+            try
             {
-                var badResponse = req.CreateResponse(HttpStatusCode.BadRequest);
-                await badResponse.WriteStringAsync("Invalid customer id.");
-                return badResponse;
-            }
-
-            CustomerResponseDto? customer;
-            var connectionString = Environment.GetEnvironmentVariable("SqlConnectionString");
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                await connection.OpenAsync();
-
-                // Get the basic customer information.
-                customer = await GetCustomerBasicAsync(connection, customerId);
-
-                // If no customer was found, return immediately.
-                if (customer == null)
+                // Validate the ID.
+                if (!int.TryParse(id, out int customerId))
                 {
-                    var notFoundResponse = req.CreateResponse(HttpStatusCode.NotFound);
-                    await notFoundResponse.WriteStringAsync("Customer not found.");
-                    return notFoundResponse;
+                    _logger.LogWarning("Invalid customer ID: {Id}", id);
+                    var badResponse = req.CreateResponse(HttpStatusCode.BadRequest);
+                    await badResponse.WriteStringAsync("Invalid customer id.");
+                    return badResponse;
                 }
 
-                // Populate the associated collections.
-                customer.Addresses = await GetAddressesAsync(connection, customerId);
-                customer.Phones = await GetPhonesAsync(connection, customerId);
-                customer.Orders = await GetOrdersAsync(connection, customerId);
-            }
+                CustomerResponseDto? customer;
+                var connectionString = Environment.GetEnvironmentVariable("SqlConnectionString");
 
-            var response = req.CreateResponse(HttpStatusCode.OK);
-            response.Headers.Add("Content-Type", "application/json");
-            string jsonResponse = JsonConvert.SerializeObject(customer);
-            await response.WriteStringAsync(jsonResponse);
-            return response;
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+                    _logger.LogInformation("Database connection opened successfully.");
+
+                    // Get the basic customer information.
+                    customer = await GetCustomerBasicAsync(connection, customerId);
+
+                    // If no customer was found, return immediately.
+                    if (customer == null)
+                    {
+                        _logger.LogWarning("Customer with ID {CustomerId} not found.", customerId);
+                        var notFoundResponse = req.CreateResponse(HttpStatusCode.NotFound);
+                        await notFoundResponse.WriteStringAsync("Customer not found.");
+                        return notFoundResponse;
+                    }
+
+                    // Populate the associated collections.
+                    customer.Addresses = await GetAddressesAsync(connection, customerId);
+                    customer.Phones = await GetPhonesAsync(connection, customerId);
+                    customer.Orders = await GetOrdersAsync(connection, customerId);
+                }
+
+                var response = req.CreateResponse(HttpStatusCode.OK);
+                response.Headers.Add("Content-Type", "application/json");
+                string jsonResponse = JsonConvert.SerializeObject(customer);
+                await response.WriteStringAsync(jsonResponse);
+                _logger.LogInformation("Customer data successfully retrieved and returned for ID {CustomerId}.", customerId);
+                return response;
+            }
+            catch (SqlException sqlEx)
+            {
+                _logger.LogError(sqlEx, "A database error occurred while processing the request.");
+                var errorResponse = req.CreateResponse(HttpStatusCode.InternalServerError);
+                await errorResponse.WriteStringAsync("A database error occurred. Please try again later.");
+                return errorResponse;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred while processing the request.");
+                var errorResponse = req.CreateResponse(HttpStatusCode.InternalServerError);
+                await errorResponse.WriteStringAsync("An unexpected error occurred. Please try again later.");
+                return errorResponse;
+            }
         }
 
         private async Task<CustomerResponseDto?> GetCustomerBasicAsync(SqlConnection connection, int customerId)
         {
-            using (var cmd = new SqlCommand(
-                "SELECT CustomerId, FirstName, LastName, Email, CreatedDate FROM dbo.Customer WHERE CustomerId = @CustomerId",
-                connection))
+            try
             {
-                cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
-                using (var reader = await cmd.ExecuteReaderAsync())
+                using (var cmd = new SqlCommand(
+                    "SELECT CustomerId, FirstName, LastName, Email, CreatedDate FROM dbo.Customer WHERE CustomerId = @CustomerId",
+                    connection))
                 {
-                    if (await reader.ReadAsync())
+                    cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
+                    using (var reader = await cmd.ExecuteReaderAsync())
                     {
-                        return new CustomerResponseDto
+                        if (await reader.ReadAsync())
                         {
-                            CustomerId = (int)reader["CustomerId"],
-                            FirstName = reader["FirstName"].ToString(),
-                            LastName = reader["LastName"].ToString(),
-                            Email = reader["Email"].ToString(),
-                            CreatedDate = Convert.ToDateTime(reader["CreatedDate"]),
-                            Addresses = new List<AddressResponseDto>(),
-                            Phones = new List<PhoneResponseDto>(),
-                            Orders = new List<OrderDto>()
-                        };
+                            return new CustomerResponseDto
+                            {
+                                CustomerId = (int)reader["CustomerId"],
+                                FirstName = reader["FirstName"].ToString(),
+                                LastName = reader["LastName"].ToString(),
+                                Email = reader["Email"].ToString(),
+                                CreatedDate = Convert.ToDateTime(reader["CreatedDate"]),
+                                Addresses = new List<AddressResponseDto>(),
+                                Phones = new List<PhoneResponseDto>(),
+                                Orders = new List<OrderDto>()
+                            };
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving basic customer information for ID {CustomerId}.", customerId);
+                throw;
             }
             return null;
         }
@@ -95,25 +124,33 @@ namespace FakeCustomersFunctionApp
         private async Task<List<AddressResponseDto>> GetAddressesAsync(SqlConnection connection, int customerId)
         {
             var addresses = new List<AddressResponseDto>();
-            using (var cmd = new SqlCommand(
-                "SELECT AddressId, StreetAddress, Address.ZipCode, City, [State] FROM dbo.Address JOIN ZipCode on Address.ZipCode = ZipCode.ZipCode WHERE CustomerId = @CustomerId",
-                connection))
+            try
             {
-                cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
-                using (var reader = await cmd.ExecuteReaderAsync())
+                using (var cmd = new SqlCommand(
+                    "SELECT AddressId, StreetAddress, Address.ZipCode, City, [State] FROM dbo.Address JOIN ZipCode on Address.ZipCode = ZipCode.ZipCode WHERE CustomerId = @CustomerId",
+                    connection))
                 {
-                    while (await reader.ReadAsync())
+                    cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
+                    using (var reader = await cmd.ExecuteReaderAsync())
                     {
-                        addresses.Add(new AddressResponseDto
+                        while (await reader.ReadAsync())
                         {
-                            AddressId = (int)reader["AddressId"],
-                            StreetAddress = reader["StreetAddress"].ToString(),
-                            ZipCode = reader["ZipCode"].ToString(),
-                            City = reader["City"].ToString(),
-                            State = reader["State"].ToString()
-                        });
+                            addresses.Add(new AddressResponseDto
+                            {
+                                AddressId = (int)reader["AddressId"],
+                                StreetAddress = reader["StreetAddress"].ToString(),
+                                ZipCode = reader["ZipCode"].ToString(),
+                                City = reader["City"].ToString(),
+                                State = reader["State"].ToString()
+                            });
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving addresses for customer ID {CustomerId}.", customerId);
+                throw;
             }
             return addresses;
         }
@@ -121,25 +158,33 @@ namespace FakeCustomersFunctionApp
         private async Task<List<PhoneResponseDto>> GetPhonesAsync(SqlConnection connection, int customerId)
         {
             var phones = new List<PhoneResponseDto>();
-            using (var cmd = new SqlCommand(
-                "SELECT cp.PhoneId, cp.PhoneNumber, pt.PhoneType " +
-                "FROM dbo.CustomerPhone cp " +
-                "JOIN dbo.PhoneType pt ON cp.PhoneTypeId = pt.PhoneTypeId " +
-                "WHERE cp.CustomerId = @CustomerId", connection))
+            try
             {
-                cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
-                using (var reader = await cmd.ExecuteReaderAsync())
+                using (var cmd = new SqlCommand(
+                    "SELECT cp.PhoneId, cp.PhoneNumber, pt.PhoneType " +
+                    "FROM dbo.CustomerPhone cp " +
+                    "JOIN dbo.PhoneType pt ON cp.PhoneTypeId = pt.PhoneTypeId " +
+                    "WHERE cp.CustomerId = @CustomerId", connection))
                 {
-                    while (await reader.ReadAsync())
+                    cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
+                    using (var reader = await cmd.ExecuteReaderAsync())
                     {
-                        phones.Add(new PhoneResponseDto
+                        while (await reader.ReadAsync())
                         {
-                            PhoneId = (int)reader["PhoneId"],
-                            PhoneNumber = reader["PhoneNumber"].ToString(),
-                            PhoneType = reader["PhoneType"].ToString()
-                        });
+                            phones.Add(new PhoneResponseDto
+                            {
+                                PhoneId = (int)reader["PhoneId"],
+                                PhoneNumber = reader["PhoneNumber"].ToString(),
+                                PhoneType = reader["PhoneType"].ToString()
+                            });
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving phone numbers for customer ID {CustomerId}.", customerId);
+                throw;
             }
             return phones;
         }
@@ -147,28 +192,36 @@ namespace FakeCustomersFunctionApp
         private async Task<List<OrderDto>> GetOrdersAsync(SqlConnection connection, int customerId)
         {
             var orders = new List<OrderDto>();
-            using (var cmd = new SqlCommand(
-                "SELECT OrderId, OrderDate FROM dbo.[Order] WHERE CustomerId = @CustomerId", connection))
+            try
             {
-                cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
-                using (var reader = await cmd.ExecuteReaderAsync())
+                using (var cmd = new SqlCommand(
+                    "SELECT OrderId, OrderDate FROM dbo.[Order] WHERE CustomerId = @CustomerId", connection))
                 {
-                    while (await reader.ReadAsync())
+                    cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
+                    using (var reader = await cmd.ExecuteReaderAsync())
                     {
-                        orders.Add(new OrderDto
+                        while (await reader.ReadAsync())
                         {
-                            OrderId = (int)reader["OrderId"],
-                            OrderDate = Convert.ToDateTime(reader["OrderDate"]),
-                            OrderItems = new List<OrderItemDto>()
-                        });
+                            orders.Add(new OrderDto
+                            {
+                                OrderId = (int)reader["OrderId"],
+                                OrderDate = Convert.ToDateTime(reader["OrderDate"]),
+                                OrderItems = new List<OrderItemDto>()
+                            });
+                        }
                     }
                 }
-            }
 
-            // For each order, retrieve its order items.
-            foreach (var order in orders)
+                // For each order, retrieve its order items.
+                foreach (var order in orders)
+                {
+                    order.OrderItems = await GetOrderItemsAsync(connection, order.OrderId);
+                }
+            }
+            catch (Exception ex)
             {
-                order.OrderItems = await GetOrderItemsAsync(connection, order.OrderId);
+                _logger.LogError(ex, "Error occurred while retrieving orders for customer ID {CustomerId}.", customerId);
+                throw;
             }
             return orders;
         }
@@ -176,23 +229,31 @@ namespace FakeCustomersFunctionApp
         private async Task<List<OrderItemDto>> GetOrderItemsAsync(SqlConnection connection, int orderId)
         {
             var orderItems = new List<OrderItemDto>();
-            using (var cmd = new SqlCommand(
-                "SELECT OrderItemId, ProductId, Quantity, UnitPrice FROM dbo.OrderItem WHERE OrderId = @OrderId", connection))
+            try
             {
-                cmd.Parameters.Add(new SqlParameter("@OrderId", SqlDbType.Int) { Value = orderId });
-                using (var reader = await cmd.ExecuteReaderAsync())
+                using (var cmd = new SqlCommand(
+                    "SELECT OrderItemId, ProductId, Quantity, UnitPrice FROM dbo.OrderItem WHERE OrderId = @OrderId", connection))
                 {
-                    while (await reader.ReadAsync())
+                    cmd.Parameters.Add(new SqlParameter("@OrderId", SqlDbType.Int) { Value = orderId });
+                    using (var reader = await cmd.ExecuteReaderAsync())
                     {
-                        orderItems.Add(new OrderItemDto
+                        while (await reader.ReadAsync())
                         {
-                            OrderItemId = (int)reader["OrderItemId"],
-                            ProductId = (int)reader["ProductId"],
-                            Quantity = (int)reader["Quantity"],
-                            UnitPrice = (decimal)reader["UnitPrice"]
-                        });
+                            orderItems.Add(new OrderItemDto
+                            {
+                                OrderItemId = (int)reader["OrderItemId"],
+                                ProductId = (int)reader["ProductId"],
+                                Quantity = (int)reader["Quantity"],
+                                UnitPrice = (decimal)reader["UnitPrice"]
+                            });
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving order items for order ID {OrderId}.", orderId);
+                throw;
             }
             return orderItems;
         }

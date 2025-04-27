@@ -27,47 +27,60 @@ namespace FakeCustomersFunctionApp.Functions
             {
                 _logger.LogInformation("GetAllProducts function triggered.");
 
-                string? connectionStringNullable = Environment.GetEnvironmentVariable("SqlConnectionString");
-                if (string.IsNullOrEmpty(connectionStringNullable))
+                try
                 {
-                    throw new InvalidOperationException("The SQL connection string is not configured in the environment variables.");
-                }
-
-                string connectionString = connectionStringNullable;
-                var products = new List<ProductResponseDto>();
-
-                using (var connection = new SqlConnection(connectionString))
-                {
-                    await connection.OpenAsync();
-
-                    using (var cmd = new SqlCommand(
-                        "SELECT ProductId, ProductName, Description, Price, CategoryName from dbo.Product LEFT JOIN dbo.ProductCategory on Product.CategoryId = ProductCategory.CategoryId",
-                        connection))
+                    string? connectionStringNullable = Environment.GetEnvironmentVariable("SqlConnectionString");
+                    if (string.IsNullOrEmpty(connectionStringNullable))
                     {
-                        using (var reader = await cmd.ExecuteReaderAsync())
+                        throw new InvalidOperationException("The SQL connection string is not configured in the environment variables.");
+                    }
+
+                    string connectionString = connectionStringNullable;
+                    var products = new List<ProductResponseDto>();
+
+                    using (var connection = new SqlConnection(connectionString))
+                    {
+                        await connection.OpenAsync();
+                        _logger.LogInformation("Database connection opened successfully for GetAllProducts.");
+
+                        using (var cmd = new SqlCommand(
+                            "SELECT ProductId, ProductName, Description, Price, CategoryName from dbo.Product LEFT JOIN dbo.ProductCategory on Product.CategoryId = ProductCategory.CategoryId",
+                            connection))
                         {
-                            while (await reader.ReadAsync())
+                            using (var reader = await cmd.ExecuteReaderAsync())
                             {
-                                var product = new ProductResponseDto
+                                while (await reader.ReadAsync())
                                 {
-                                    ProductId = (int)reader["ProductId"],
-                                    ProductName = reader["ProductName"].ToString() ?? string.Empty,
-                                    // Use as-cast for nullable strings
-                                    Description = reader["Description"] as string,
-                                    Price = (decimal)reader["Price"],
-                                    CategoryName = reader["CategoryName"].ToString() ?? string.Empty
-                                };
-                                products.Add(product);
+                                    var product = new ProductResponseDto
+                                    {
+                                        ProductId = (int)reader["ProductId"],
+                                        ProductName = reader["ProductName"].ToString() ?? string.Empty,
+                                        Description = reader["Description"] as string,
+                                        Price = (decimal)reader["Price"],
+                                        CategoryName = reader["CategoryName"].ToString() ?? string.Empty
+                                    };
+                                    products.Add(product);
+                                }
                             }
                         }
                     }
-                }
 
-                var response = req.CreateResponse(HttpStatusCode.OK);
-                response.Headers.Add("Content-Type", "application/json");
-                string jsonResponse = JsonConvert.SerializeObject(products);
-                await response.WriteStringAsync(jsonResponse);
-                return response;
+                    var response = req.CreateResponse(HttpStatusCode.OK);
+                    response.Headers.Add("Content-Type", "application/json");
+                    string jsonResponse = JsonConvert.SerializeObject(products);
+                    await response.WriteStringAsync(jsonResponse);
+                    return response;
+                }
+                catch (SqlException sqlEx)
+                {
+                    _logger.LogError(sqlEx, "A database error occurred while retrieving all products.");
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An unexpected error occurred in GetAllProducts.");
+                    throw;
+                }
             }
 
             // GET: /api/products/{id}
@@ -78,54 +91,69 @@ namespace FakeCustomersFunctionApp.Functions
             {
                 _logger.LogInformation($"GetProductById function triggered for ProductId: {id}");
 
-                string? connectionStringNullable = Environment.GetEnvironmentVariable("SqlConnectionString");
-                if (string.IsNullOrEmpty(connectionStringNullable))
+                try
                 {
-                    throw new InvalidOperationException("The SQL connection string is not configured in the environment variables.");
-                }
-                string connectionString = connectionStringNullable;
-
-                ProductResponseDto? product = null;
-
-                using (var connection = new SqlConnection(connectionString))
-                {
-                    await connection.OpenAsync();
-
-                    using (var cmd = new SqlCommand(
-                        "SELECT ProductId, ProductName, Description, Price, CategoryName from dbo.Product LEFT JOIN dbo.ProductCategory on Product.CategoryId = ProductCategory.CategoryId WHERE ProductId = @ProductId",
-                        connection))
+                    string? connectionStringNullable = Environment.GetEnvironmentVariable("SqlConnectionString");
+                    if (string.IsNullOrEmpty(connectionStringNullable))
                     {
-                        cmd.Parameters.Add(new SqlParameter("@ProductId", SqlDbType.Int) { Value = id });
+                        throw new InvalidOperationException("The SQL connection string is not configured in the environment variables.");
+                    }
+                    string connectionString = connectionStringNullable;
 
-                        using (var reader = await cmd.ExecuteReaderAsync())
+                    ProductResponseDto? product = null;
+
+                    using (var connection = new SqlConnection(connectionString))
+                    {
+                        await connection.OpenAsync();
+                        _logger.LogInformation("Database connection opened successfully for GetProductById.");
+
+                        using (var cmd = new SqlCommand(
+                            "SELECT ProductId, ProductName, Description, Price, CategoryName from dbo.Product LEFT JOIN dbo.ProductCategory on Product.CategoryId = ProductCategory.CategoryId WHERE ProductId = @ProductId",
+                            connection))
                         {
-                            if (await reader.ReadAsync())
+                            cmd.Parameters.Add(new SqlParameter("@ProductId", SqlDbType.Int) { Value = id });
+
+                            using (var reader = await cmd.ExecuteReaderAsync())
                             {
-                                product = new ProductResponseDto
+                                if (await reader.ReadAsync())
                                 {
-                                    ProductId = (int)reader["ProductId"],
-                                    ProductName = reader["ProductName"].ToString() ?? string.Empty,
-                                    Description = reader["Description"] as string,
-                                    Price = (decimal)reader["Price"],
-                                    CategoryName = reader["CategoryName"].ToString() ?? string.Empty
-                                };
+                                    product = new ProductResponseDto
+                                    {
+                                        ProductId = (int)reader["ProductId"],
+                                        ProductName = reader["ProductName"].ToString() ?? string.Empty,
+                                        Description = reader["Description"] as string,
+                                        Price = (decimal)reader["Price"],
+                                        CategoryName = reader["CategoryName"].ToString() ?? string.Empty
+                                    };
+                                }
                             }
                         }
                     }
-                }
 
-                if (product == null)
+                    if (product == null)
+                    {
+                        _logger.LogWarning("Product with ID {ProductId} not found.", id);
+                        var notFoundResponse = req.CreateResponse(HttpStatusCode.NotFound);
+                        await notFoundResponse.WriteStringAsync("Product not found.");
+                        return notFoundResponse;
+                    }
+
+                    var response = req.CreateResponse(HttpStatusCode.OK);
+                    response.Headers.Add("Content-Type", "application/json");
+                    string jsonResponse = JsonConvert.SerializeObject(product);
+                    await response.WriteStringAsync(jsonResponse);
+                    return response;
+                }
+                catch (SqlException sqlEx)
                 {
-                    var notFoundResponse = req.CreateResponse(HttpStatusCode.NotFound);
-                    await notFoundResponse.WriteStringAsync("Product not found.");
-                    return notFoundResponse;
+                    _logger.LogError(sqlEx, "A database error occurred while retrieving the product with ID {ProductId}.", id);
+                    throw;
                 }
-
-                var response = req.CreateResponse(HttpStatusCode.OK);
-                response.Headers.Add("Content-Type", "application/json");
-                string jsonResponse = JsonConvert.SerializeObject(product);
-                await response.WriteStringAsync(jsonResponse);
-                return response;
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An unexpected error occurred in GetProductById for ProductId: {ProductId}.", id);
+                    throw;
+                }
             }
         }
     }
