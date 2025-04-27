@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
 		SendToGitHub.ps1 = SendToGitHub.ps1
+		readme.md = readme.md
 	EndProjectSection
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "FakeCustomers.Database", "PlayWithSQL.Database\FakeCustomers.Database.sqlproj", "{579D9C71-905E-4DBB-BC25-563A1EC6E2B1}"
