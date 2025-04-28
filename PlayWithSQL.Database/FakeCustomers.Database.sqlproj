@@ -68,5 +68,7 @@
     <Build Include="Tables\CreateSchema.sql" />
     <PostDeploy Include="Post Deployment\PostDeployment.sql" />
     <None Include="Queries\MiscQueries.sql" />
+    <None Include="Queries\OrdersQueries.sql" />
+    <None Include="Queries\CustomerQueries.sql" />
   </ItemGroup>
 </Project>

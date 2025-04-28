@@ -131,3 +131,101 @@ GO
 CREATE NONCLUSTERED INDEX IX_Customer_Email
 ON dbo.Customer(Email);
 GO
+
+/* --- Archive Tables --- */
+
+CREATE TABLE dbo.Customer_Archive
+(
+    CustomerId INT NOT NULL,
+    FirstName NVARCHAR(100) NOT NULL,
+    LastName NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(150) NOT NULL,
+    CreatedDate DATETIME2 NOT NULL,
+    DeletedDate DATETIME2 DEFAULT GETDATE(),
+    PRIMARY KEY (CustomerId, DeletedDate)
+);
+GO
+
+CREATE TABLE dbo.PhoneType_Archive
+(
+    PhoneTypeId INT NOT NULL,
+    PhoneType NVARCHAR(50) NOT NULL,
+    DeletedDate DATETIME2 DEFAULT GETDATE(),
+    PRIMARY KEY (PhoneTypeId, DeletedDate)
+);
+GO
+
+CREATE TABLE dbo.ZipCode_Archive
+(
+    ZipCode NVARCHAR(10) NOT NULL,
+    City NVARCHAR(100) NOT NULL,
+    State CHAR(2) NOT NULL,
+    DeletedDate DATETIME2 DEFAULT GETDATE(),
+    PRIMARY KEY (ZipCode, DeletedDate)
+);
+GO
+
+CREATE TABLE dbo.ProductCategory_Archive
+(
+    CategoryId INT NOT NULL,
+    CategoryName NVARCHAR(100) NOT NULL,
+    DeletedDate DATETIME2 DEFAULT GETDATE(),
+    PRIMARY KEY (CategoryId, DeletedDate)
+);
+GO
+
+CREATE TABLE dbo.Product_Archive
+(
+    ProductId INT NOT NULL,
+    ProductName NVARCHAR(150) NOT NULL,
+    Description NVARCHAR(MAX),
+    Price DECIMAL(10,2) NOT NULL,
+    CategoryId INT NOT NULL,
+    DeletedDate DATETIME2 DEFAULT GETDATE(),
+    PRIMARY KEY (ProductId, DeletedDate)
+);
+GO
+
+CREATE TABLE dbo.Order_Archive
+(
+    OrderId INT NOT NULL,
+    CustomerId INT NOT NULL,
+    OrderDate DATETIME2 NOT NULL,
+    DeletedDate DATETIME2 DEFAULT GETDATE(),
+    PRIMARY KEY (OrderId, DeletedDate)
+);
+GO
+
+CREATE TABLE dbo.OrderItem_Archive
+(
+    OrderItemId INT NOT NULL,
+    OrderId INT NOT NULL,
+    ProductId INT NOT NULL,
+    Quantity INT NOT NULL,
+    UnitPrice DECIMAL(10,2) NOT NULL,
+    DeletedDate DATETIME2 DEFAULT GETDATE(),
+    PRIMARY KEY (OrderItemId, DeletedDate)
+);
+GO
+
+CREATE TABLE dbo.Address_Archive
+(
+    AddressId INT NOT NULL,
+    CustomerId INT NOT NULL,
+    StreetAddress NVARCHAR(200) NOT NULL,
+    ZipCode NVARCHAR(10) NOT NULL,
+    DeletedDate DATETIME2 DEFAULT GETDATE(),
+    PRIMARY KEY (AddressId, DeletedDate)
+);
+GO
+
+CREATE TABLE dbo.CustomerPhone_Archive
+(
+    PhoneId INT NOT NULL,
+    CustomerId INT NOT NULL,
+    PhoneNumber NVARCHAR(20) NOT NULL,
+    PhoneTypeId INT NOT NULL,
+    DeletedDate DATETIME2 DEFAULT GETDATE(),
+    PRIMARY KEY (PhoneId, DeletedDate)
+);
+GO

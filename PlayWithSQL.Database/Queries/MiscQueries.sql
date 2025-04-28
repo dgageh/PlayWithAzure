@@ -48,3 +48,7 @@ SELECT OrderItemId, OrderItem.ProductId, Quantity, UnitPrice, ProductName, Categ
 	JOIN dbo.Product ON OrderItem.ProductId = Product.ProductId
 	JOIN dbo.ProductCategory on Product.CategoryId = ProductCategory.CategoryId 
 	WHERE OrderId=5
+
+--delete from customer where Customerid = 1
+--select * from Customer_Archive
+

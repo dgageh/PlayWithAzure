@@ -215,3 +215,129 @@ BEGIN
     END CATCH
 END;
 GO
+
+-- Trigger for Customer Table
+CREATE OR ALTER TRIGGER trg_Customer_Delete
+ON dbo.Customer
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.Customer_Archive (CustomerId, FirstName, LastName, Email, CreatedDate, DeletedDate)
+    SELECT CustomerId, FirstName, LastName, Email, CreatedDate, GETDATE()
+    FROM DELETED;
+END;
+GO
+
+-- Trigger for PhoneType Table
+CREATE OR ALTER TRIGGER trg_PhoneType_Delete
+ON dbo.PhoneType
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.PhoneType_Archive (PhoneTypeId, PhoneType, DeletedDate)
+    SELECT PhoneTypeId, PhoneType, GETDATE()
+    FROM DELETED;
+END;
+GO
+
+-- Trigger for ZipCode Table
+CREATE OR ALTER TRIGGER trg_ZipCode_Delete
+ON dbo.ZipCode
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.ZipCode_Archive (ZipCode, City, State, DeletedDate)
+    SELECT ZipCode, City, State, GETDATE()
+    FROM DELETED;
+END;
+GO
+
+-- Trigger for ProductCategory Table
+CREATE OR ALTER TRIGGER trg_ProductCategory_Delete
+ON dbo.ProductCategory
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.ProductCategory_Archive (CategoryId, CategoryName, DeletedDate)
+    SELECT CategoryId, CategoryName, GETDATE()
+    FROM DELETED;
+END;
+GO
+
+-- Trigger for Product Table
+CREATE OR ALTER TRIGGER trg_Product_Delete
+ON dbo.Product
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.Product_Archive (ProductId, ProductName, Description, Price, CategoryId, DeletedDate)
+    SELECT ProductId, ProductName, Description, Price, CategoryId, GETDATE()
+    FROM DELETED;
+END;
+GO
+
+-- Trigger for Order Table
+CREATE OR ALTER TRIGGER trg_Order_Delete
+ON dbo.[Order]
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.Order_Archive (OrderId, CustomerId, OrderDate, DeletedDate)
+    SELECT OrderId, CustomerId, OrderDate, GETDATE()
+    FROM DELETED;
+END;
+GO
+
+-- Trigger for OrderItem Table
+CREATE OR ALTER TRIGGER trg_OrderItem_Delete
+ON dbo.OrderItem
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.OrderItem_Archive (OrderItemId, OrderId, ProductId, Quantity, UnitPrice, DeletedDate)
+    SELECT OrderItemId, OrderId, ProductId, Quantity, UnitPrice, GETDATE()
+    FROM DELETED;
+END;
+GO
+
+-- Trigger for Address Table
+CREATE OR ALTER TRIGGER trg_Address_Delete
+ON dbo.Address
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.Address_Archive (AddressId, CustomerId, StreetAddress, ZipCode, DeletedDate)
+    SELECT AddressId, CustomerId, StreetAddress, ZipCode, GETDATE()
+    FROM DELETED;
+END;
+GO
+
+-- Trigger for CustomerPhone Table
+CREATE OR ALTER TRIGGER trg_CustomerPhone_Delete
+ON dbo.CustomerPhone
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.CustomerPhone_Archive (PhoneId, CustomerId, PhoneNumber, PhoneTypeId, DeletedDate)
+    SELECT PhoneId, CustomerId, PhoneNumber, PhoneTypeId, GETDATE()
+    FROM DELETED;
+END;
+GO
