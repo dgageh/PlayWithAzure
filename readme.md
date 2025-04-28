@@ -1,4 +1,4 @@
-This project contains two unrelated learning exercises
+This project contains two unrelated demonstration exercises
 * A merge sort implemented with Azure Durable Functions and triggered by an HTTP function trigger. It writes its 
 results to Azure Table Storage.  It includes a number of Azure Functions to then interact with the Table Storage
 * An Azure SQL customers/orders database, code to populate it with fake data, and an Azure Functions APP to expose
